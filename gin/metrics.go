@@ -4,15 +4,15 @@ package gin
 
 import (
 	"context"
-	"net/http"
-	"strconv"
-	"time"
-
+	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 	"github.com/luraproject/lura/v2/config"
 	"github.com/luraproject/lura/v2/logging"
 	"github.com/luraproject/lura/v2/proxy"
 	krakendgin "github.com/luraproject/lura/v2/router/gin"
+	"net/http"
+	"strconv"
+	"time"
 
 	metrics "github.com/krakendio/krakend-metrics/v2"
 	"github.com/krakendio/krakend-metrics/v2/mux"
@@ -35,10 +35,7 @@ type Metrics struct {
 // RunEndpoint runs the *gin.Engine (that should have the stats endpoint) with the logger
 func (m *Metrics) RunEndpoint(ctx context.Context, e *gin.Engine, l logging.Logger) {
 	logPrefix := "[SERVICE: Stats]"
-	server := &http.Server{
-		Addr:    m.Config.ListenAddr,
-		Handler: e,
-	}
+	server := endless.NewServer(m.Config.ListenAddr, e)
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			l.Error(logPrefix, err.Error())
